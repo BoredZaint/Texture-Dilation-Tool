@@ -202,6 +202,38 @@
             color: #333;
             margin-bottom: 10px;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .clear-btn {
+            background: none;
+            border: none;
+            color: #d65555;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 0;
+            margin: 0;
+            width: auto;
+            height: auto;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+            line-height: 1;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+        
+        .clear-btn.visible {
+            display: inline-flex;
+        }
+        
+        .clear-btn:hover {
+            color: #b84444;
         }
         
         canvas {
@@ -296,11 +328,17 @@
         
         <div class="canvas-container hidden" id="canvasContainer">
             <div class="canvas-wrapper">
-                <h3>Original</h3>
+                <h3>
+                    Original
+                    <button class="clear-btn" id="clearOriginal" title="Clear original image">×</button>
+                </h3>
                 <canvas id="originalCanvas"></canvas>
             </div>
             <div class="canvas-wrapper">
-                <h3>Dilated Result</h3>
+                <h3>
+                    Dilated Result
+                    <button class="clear-btn" id="clearResult" title="Clear result image">×</button>
+                </h3>
                 <div style="position: relative;">
                     <canvas id="resultCanvas"></canvas>
                     <canvas class="magnifier" id="magnifier"></canvas>
@@ -324,6 +362,8 @@
         const smoothnessInput = document.getElementById('smoothnessInput');
         const infiniteDilationCheckbox = document.getElementById('infiniteDilation');
         const makeFullyOpaqueCheckbox = document.getElementById('makeFullyOpaque');
+        const clearOriginalBtn = document.getElementById('clearOriginal');
+        const clearResultBtn = document.getElementById('clearResult');
         
         let currentImage = null;
         let currentFileName = 'image';
@@ -424,6 +464,7 @@
             const ctx = originalCanvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
             canvasContainer.classList.remove('hidden');
+            clearOriginalBtn.classList.add('visible');
         }
         
         processBtn.addEventListener('click', () => {
@@ -485,6 +526,7 @@
             processing.classList.add('hidden');
             processBtn.disabled = false;
             downloadBtn.classList.remove('hidden');
+            clearResultBtn.classList.add('visible');
         }
         
         function findEdgePixels(imageData, width, height) {
@@ -639,6 +681,35 @@
             magnifierCtx.moveTo(0, magnifierSize / 2);
             magnifierCtx.lineTo(magnifierSize, magnifierSize / 2);
             magnifierCtx.stroke();
+        });
+        
+        // Clear buttons functionality
+        clearOriginalBtn.addEventListener('click', () => {
+            const ctx = originalCanvas.getContext('2d');
+            ctx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+            originalCanvas.width = 0;
+            originalCanvas.height = 0;
+            currentImage = null;
+            processBtn.disabled = true;
+            downloadBtn.classList.add('hidden');
+            clearOriginalBtn.classList.remove('visible');
+            
+            if (resultCanvas.width === 0) {
+                canvasContainer.classList.add('hidden');
+            }
+        });
+        
+        clearResultBtn.addEventListener('click', () => {
+            const ctx = resultCanvas.getContext('2d');
+            ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+            resultCanvas.width = 0;
+            resultCanvas.height = 0;
+            downloadBtn.classList.add('hidden');
+            clearResultBtn.classList.remove('visible');
+            
+            if (originalCanvas.width === 0) {
+                canvasContainer.classList.add('hidden');
+            }
         });
     </script>
 </body>
